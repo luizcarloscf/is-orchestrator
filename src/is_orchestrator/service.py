@@ -5,7 +5,6 @@ from is_msgs.camera_pb2 import CameraConfig, CameraConfigFields
 from is_msgs.common_pb2 import FieldSelector
 from enum import Enum
 import requests
-import yaml
 import json
 import socket
 import sys
@@ -44,7 +43,7 @@ def main():
     cpu_deployment_address = 'https://raw.githubusercontent.com/luizcarloscf/metrics/master/is-skeletons-detector/is-skeletons-detector-cpu.yaml'
     gpu_deployment_address = 'https://raw.githubusercontent.com/luizcarloscf/metrics/master/is-skeletons-detector/is-skeletons-dectetor-gpu.yaml'
        
-    config_file = sys.argv[1] if len(sys.argv) > 1 else "../../etc/conf/config.json"
+    config_file = sys.argv[1] if len(sys.argv) > 1 else "config.json"
     config = json.load(open(config_file, 'r'))
 
     broker_uri = config['broker_uri']

@@ -9,4 +9,4 @@ COPY etc/conf/config.json ./
 
 RUN pip3 install .
 
-# CMD ["is-orchestrator"]
+CMD ["is-orchestrator"]
