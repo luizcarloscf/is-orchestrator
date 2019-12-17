@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-is-orchestrator
+  namespace: default
+data:
+  cfgmap_orch: |-
+    {
+    "broker_uri": "amqp://rabbitmq.default"
+    }
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "is-orchestrator"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cfgmap_orch
+    spec:
+      containers:
+        - name: service
+          image: wagnercotta/is-orchestrator:latest
+          command: ["is-orchestrator"]
+          args: ["/conf/config.json"]
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: "1"
+              memory: 256Mi
+          volumeMounts:
+            - name: config
+              mountPath: /conf/
+      volumes:
+        - name: config
+          configMap:
+            name: configmap-is-orchestrator
+            items:
+              - key: cfgmap_orch
+                path: config.json
