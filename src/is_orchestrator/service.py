@@ -30,8 +30,10 @@ def has_detection(logger, service_name):
     logger.info("Detection Average:{}".format(detect_counter))
     return True if detect_counter >= 1.0 else False
 
-def kubernetes_control(option,arg=None):
-    os.system("kubectl {} {}".format(option,arg)) if arg is not None else os.system("kubectl {}".format(option))
+def kubernetes_control(logger=None,option=option,arg=None):
+    cmd = "kubectl {} {}".format(option,arg) if arg is not None else "kubectl {}".format(option)
+    if logger is not None: logger.info(cmd)
+    os.system(cmd) 
 
 
 def main():
@@ -41,7 +43,7 @@ def main():
     gpu_deployment_name = 'is-skeletons-detector-gpu'
 
     cpu_deployment_address = 'is-skeletons-detector-cpu.yaml'
-    gpu_deployment_address = 'is-skeletons-dectetor-gpu.yaml'
+    gpu_deployment_address = 'is-skeletons-detector-gpu.yaml'
        
     config_file = sys.argv[1] if len(sys.argv) > 1 else "config.json"
     config = json.load(open(config_file, 'r'))
@@ -78,9 +80,9 @@ def main():
                 except socket.timeout: 
                     logger('No reply :(')
             logger.info("DETECTED! Deleting CPU deployment")
-            kubernetes_control(k8s_control.delete_deploy,cpu_deployment_name)
+            kubernetes_control(logger,k8s_control.delete_deploy,cpu_deployment_name)
             logger.info("DETECTED! Creating GPU deployment")
-            kubernetes_control(k8s_control.apply,gpu_deployment_address)
+            kubernetes_control(logger,k8s_control.apply,gpu_deployment_address)
         elif not has_detection(logger,service_name) and current_fps != 1.0:
             logger.info("NOT DETECTED! Changing FPS to 1.0")
             current_fps = 1.0
@@ -94,9 +96,9 @@ def main():
                 except socket.timeout: 
                     logger.info('No reply :(')
             logger.info("NOT DETECTED! Deleting GPU deployment")
-            kubernetes_control(k8s_control.delete_deploy,gpu_deployment_name)
+            kubernetes_control(logger,k8s_control.delete_deploy,gpu_deployment_name)
             logger.info("NOT DETECTED! Creating CPU deployment")
-            kubernetes_control(k8s_control.apply,cpu_deployment_address)
+            kubernetes_control(logger,k8s_control.apply,cpu_deployment_address)
         time.sleep(2.5)
 
 if __name__ == '__main__':
