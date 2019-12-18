@@ -2,6 +2,10 @@ FROM python:3.6-slim as package_step
 
 RUN apt-get update
 
+COPY --from=lachlanevenson/k8s-kubectl:v1.10.3 /usr/local/bin/kubectl /usr/local/bin/kubectl
+
+COPY etc/kube/config /root/.kube/
+
 WORKDIR /opt/is
 COPY src/ src
 COPY setup.py ./

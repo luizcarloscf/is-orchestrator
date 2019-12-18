@@ -95,7 +95,7 @@ def main():
                     print('No reply :(')
             logger.info("NOT DETECTED! Deleting GPU deployment")
             kubernetes_control(k8s_control.delete_deploy,gpu_deployment_name)
-            logger.info("DETECTED! Creating CPU deployment")
+            logger.info("NOT DETECTED! Creating CPU deployment")
             kubernetes_control(k8s_control.apply,cpu_deployment_address)
         time.sleep(2.5)
 
