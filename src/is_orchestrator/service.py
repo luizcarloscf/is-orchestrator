@@ -60,7 +60,7 @@ def main():
         current_fps = unpacked_msg.sampling.frequency.value
         logger.info("Current FPS: {}".format(current_fps))
     except socket.timeout:
-        print('No reply :(')
+        logger.info('No reply :(')
 
     range_cam_services = 4
     while True:
@@ -74,9 +74,9 @@ def main():
                 channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
                 try:
                     reply = channel.consume(timeout=1.0)
-                    print('RPC Status:', reply.status)
+                    logger.info('RPC Status:', reply.status)
                 except socket.timeout: 
-                    print('No reply :(')
+                    logger('No reply :(')
             logger.info("DETECTED! Deleting CPU deployment")
             kubernetes_control(k8s_control.delete_deploy,cpu_deployment_name)
             logger.info("DETECTED! Creating GPU deployment")
@@ -90,9 +90,9 @@ def main():
                 channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
                 try:
                     reply = channel.consume(timeout=1.0)
-                    print('RPC Status:', reply.status)
+                    logger.info('RPC Status:', reply.status)
                 except socket.timeout: 
-                    print('No reply :(')
+                    logger.info('No reply :(')
             logger.info("NOT DETECTED! Deleting GPU deployment")
             kubernetes_control(k8s_control.delete_deploy,gpu_deployment_name)
             logger.info("NOT DETECTED! Creating CPU deployment")
