@@ -1,15 +1,18 @@
-FROM python:3.6-slim as package_step
+FROM gliderlabs/alpine:3.4 as dl_ikd
 
-RUN apt-get update && apt-get install -y wget
+RUN apk add --no-cache git && \
+git clone https://github.com/luizcarloscf/metrics.git
 
-COPY --from=lachlanevenson/k8s-kubectl:v1.10.3 /usr/local/bin/kubectl /usr/local/bin/kubectl
+FROM python:3.6-slim
+
+RUN apt-get update
+
+COPY --from=lachlanevenson/k8s-kubectl:v1.14.0 /usr/local/bin/kubectl /usr/local/bin/kubectl
 
 COPY etc/kube/config /root/.kube/
 
 WORKDIR /opt/is
-RUN wget https://raw.githubusercontent.com/luizcarloscf/metrics/master/is-skeletons-detector/is-skeletons-detector-cpu.yaml && \
-    wget https://raw.githubusercontent.com/luizcarloscf/metrics/master/is-skeletons-detector/is-skeletons-dectetor-gpu.yaml
-
+COPY --from=dl_ikd metrics/is-skeletons-detector/ .
 COPY src/ src
 COPY setup.py ./
 COPY etc/conf/config.json ./
