@@ -74,7 +74,7 @@ def main():
                 channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
                 try:
                     reply = channel.consume(timeout=1.0)
-                    logger.info('RPC Status:{}'.format(reply.status))
+                    logger.info('RPC Status: {}',reply.status)
                 except socket.timeout: 
                     logger('No reply :(')
             logger.info("DETECTED! Deleting CPU deployment")
@@ -90,7 +90,7 @@ def main():
                 channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
                 try:
                     reply = channel.consume(timeout=1.0)
-                    logger.info('RPC Status:{}'.format(reply.status))
+                    logger.info('RPC Status: {}',reply.status)
                 except socket.timeout: 
                     logger.info('No reply :(')
             logger.info("NOT DETECTED! Deleting GPU deployment")
