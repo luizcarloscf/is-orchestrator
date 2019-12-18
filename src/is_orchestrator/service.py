@@ -30,8 +30,8 @@ def has_detection(logger, service_name):
     logger.info("Detection Average:{}".format(detect_counter))
     return True if detect_counter >= 1.0 else False
 
-def kubernetes_control(logger=None,option=option,arg=None):
-    cmd = "kubectl {} {}".format(option,arg) if arg is not None else "kubectl {}".format(option)
+def kubernetes_control(logger=None,options=None,arg=None):
+    cmd = "kubectl {} {}".format(options,arg) if arg is not None else "kubectl {}".format(options)
     if logger is not None: logger.info(cmd)
     os.system(cmd) 
 
