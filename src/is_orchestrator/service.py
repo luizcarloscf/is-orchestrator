@@ -78,7 +78,7 @@ def main():
                     reply = channel.consume(timeout=1.0)
                     logger.info('RPC Status: {}',reply.status)
                 except socket.timeout: 
-                    logger('No reply :(')
+                    logger.info('No reply :(')
             logger.info("DETECTED! Deleting CPU deployment")
             kubernetes_control(logger,k8s_control.delete_deploy,cpu_deployment_name)
             logger.info("DETECTED! Creating GPU deployment")
