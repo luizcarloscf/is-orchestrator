@@ -72,7 +72,7 @@ def main():
     while True:
         service_name = "skeletons_detected"
         maybe_detect = has_detection(logger,service_name)
-        maybe_change = True if (time.now() - last_change) > 30 else False
+        maybe_change = True if (time.time() - last_change) > 30 else False
         if maybe_detect and current_fps != 10.0 and maybe_change:
             logger.info("DETECTED! Changing FPS to 10.0")
             current_fps = 10.0
