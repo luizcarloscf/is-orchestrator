@@ -57,16 +57,18 @@ def main():
     last_change = time.time()
     
     selector = FieldSelector(fields=[CameraConfigFields.Value("SAMPLING_SETTINGS")])
-    channel.publish(
-        Message(content=selector, reply_to=subscription),
-        topic="CameraGateway.0.GetConfig")
-    try:
-        reply = channel.consume(timeout=1.0)
-        unpacked_msg = reply.unpack(CameraConfig)
-        current_fps = unpacked_msg.sampling.frequency.value
-        logger.info("Current FPS: {}".format(current_fps))
-    except socket.timeout:
-        logger.info('No reply :(')
+    current_fps = 0
+    while current_fps == 0:
+        channel.publish(
+            Message(content=selector, reply_to=subscription),
+            topic="CameraGateway.0.GetConfig")
+        try:
+            reply = channel.consume(timeout=5.0)
+            unpacked_msg = reply.unpack(CameraConfig)
+            current_fps = unpacked_msg.sampling.frequency.value
+            logger.info("Current FPS: {}".format(current_fps))
+        except socket.timeout:
+            logger.info('No reply :(')
 
     range_cam_services = 4
     while True:
