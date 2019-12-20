@@ -49,8 +49,9 @@ def main():
     config = json.load(open(config_file, 'r'))
 
     broker_uri = config['broker_uri']
-    channel = Channel(broker_uri)
-    subscription = Subscription(channel)
+    pub_channel = Channel(broker_uri)
+    con_channel = Channel(broker_uri)
+    subscription = Subscription(con_channel)
 
     logger.info("Creating CPU deployment")
     kubernetes_control(logger,k8s_control.apply,cpu_deployment_address)
@@ -59,11 +60,11 @@ def main():
     selector = FieldSelector(fields=[CameraConfigFields.Value("SAMPLING_SETTINGS")])
     current_fps = 0
     while current_fps == 0:
-        channel.publish(
+        pub_channel.publish(
             Message(content=selector, reply_to=subscription),
             topic="CameraGateway.0.GetConfig")
         try:
-            reply = channel.consume(timeout=5.0)
+            reply = con_channel.consume(timeout=5.0)
             unpacked_msg = reply.unpack(CameraConfig)
             current_fps = unpacked_msg.sampling.frequency.value
             logger.info("Current FPS: {}".format(current_fps))
@@ -81,9 +82,9 @@ def main():
             msg_config = CameraConfig()
             msg_config.sampling.frequency.value = 10
             for num_svc in range(range_cam_services):
-                channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
+                pub_channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
                 try:
-                    reply = channel.consume(timeout=1.0)
+                    reply = con_channel.consume(timeout=1.0)
                     logger.info('RPC Status: {}',reply.status)
                 except socket.timeout: 
                     logger.info('No reply :(')
@@ -98,9 +99,9 @@ def main():
             msg_config = CameraConfig()
             msg_config.sampling.frequency.value = 1
             for num_svc in range(range_cam_services):
-                channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
+                pub_channel.publish(Message(content=msg_config, reply_to=subscription),topic="CameraGateway.{}.SetConfig".format(num_svc))
                 try:
-                    reply = channel.consume(timeout=1.0)
+                    reply = con_channel.consume(timeout=1.0)
                     logger.info('RPC Status: {}',reply.status)
                 except socket.timeout: 
                     logger.info('No reply :(')
