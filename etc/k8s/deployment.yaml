@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: configmap-is-orchestrator
+  name: is-orchestrator
   namespace: default
 data:
-  cfgmap_orch: |-
+  options: |-
     {
-    "broker_uri": "amqp://rabbitmq.default"
+      "broker_uri": "amqp://rabbitmq.default"
     }
 ---
 apiVersion: extensions/v1beta1
@@ -18,25 +18,34 @@ spec:
   template:
     metadata:
       labels:
-        app: cfgmap_orch
+        app: is-orchestrator
     spec:
+      nodeSelector: 
+        node-role.kubernetes.io/master: ""
       containers:
-        - name: service
-          image: wagnercotta/is-orchestrator:latest
+        - name: is-orchestrator
+          image: luizcarloscf/is-orchestrator:0.0.1
           command: ["is-orchestrator"]
-          args: ["/conf/config.json"]
+          args: ["/conf/options.json"]
           imagePullPolicy: Always
           resources:
             limits:
               cpu: "1"
               memory: 256Mi
           volumeMounts:
-            - name: config
+            - name: options
               mountPath: /conf/
+            - name: config
+              mountPath: /root/.kube/config
+              readOnly: true
       volumes:
-        - name: config
+        - name: options
           configMap:
-            name: configmap-is-orchestrator
+            name: is-orchestrator
             items:
-              - key: cfgmap_orch
+              - key: options
                 path: config.json
+        - name: config
+          hostPath:
+            path: /etc/kubernets/admin.conf
+            type: File

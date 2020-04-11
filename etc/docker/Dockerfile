@@ -1,18 +1,14 @@
-FROM gliderlabs/alpine:3.4 as dl_ikd
+FROM ubuntu:18.04 as build
 
-RUN apk add --no-cache git && \
-git clone https://github.com/luizcarloscf/metrics.git
+RUN apt-get update \
+    && apt-get install -y curl ca-certificates
 
-FROM python:3.6-slim
-
-RUN apt-get update
-
-COPY --from=lachlanevenson/k8s-kubectl:v1.14.0 /usr/local/bin/kubectl /usr/local/bin/kubectl
-
-COPY etc/kube/config /root/.kube/
+WORKDIR /tmp/
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl \
+    && chmod +x ./kubectl                                                                                 
 
 WORKDIR /opt/is
-COPY --from=dl_ikd metrics/is-skeletons-detector/ .
+COPY --from=build /tmp/kubectl /usr/local/bin/kubectl
 COPY src/ src
 COPY setup.py ./
 COPY etc/conf/config.json ./
