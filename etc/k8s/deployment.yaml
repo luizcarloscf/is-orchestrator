@@ -44,8 +44,8 @@ spec:
             name: is-orchestrator
             items:
               - key: options
-                path: config.json
+                path: options.json
         - name: config
           hostPath:
-            path: /etc/kubernets/admin.conf
+            path: /etc/kubernetes/admin.conf
             type: File
