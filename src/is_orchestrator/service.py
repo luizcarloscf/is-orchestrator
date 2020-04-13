@@ -1,6 +1,7 @@
 from is_wire.core import Channel, Subscription, Message, Logger
 from .utils import load_json, get_fps, set_fps, get_metric, k8s_apply, k8s_delete
 from .average import MovingAverage
+from .pods import Pods
 import time
 import sys
 import json
@@ -22,6 +23,8 @@ def main():
 
     average_sks = MovingAverage(length=10)
     average_unc = MovingAverage(length=10)
+
+    pods = Pods(config_file="/root/.kube/config")
 
     while True:
         fps = get_fps(camera=0,
@@ -51,6 +54,7 @@ def main():
 
         skeletons = get_metric(name="skeletons")
         skeletons_average = average_sks.calculate(skeletons)
+        skeletos_pods = pods.count_pods(pod_name="is-skeletons-detector")
 
         if high_processing is False and skeletons_average <= 1:
             pass
@@ -109,7 +113,8 @@ def main():
 
         info = {
             "skeletons": skeletons,
-            "skeletons_average": skeletons_average
+            "skeletons_average": skeletons_average,
+            "skeletons_pods": skeletos_pods
         }
         logger.info('{}', str(info).replace("'", '"'))
         time.sleep(2)
