@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1 
+kind: Deployment
+metadata:
+  name: "is-skeletons-detector"
+spec:
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: is-skeletons-detector
+    spec:
+      containers:
+        - name: is-skeletons-detector
+          image: luizcarloscf/is-skeletons-detector:0.0.3-openpose
+          args: ["/opt/is/stream.bin", "/opt/options/options.json"]
+          imagePullPolicy: Always
+          ports:
+            - name: web
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          resources:
+            limits:
+              cpu: "1"
+              memory: 1024Mi
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: options
+              mountPath: /opt/options
+      terminationGracePeriodSeconds: 1
+      volumes:
+      - name: options
+        configMap:
+          name: is-skeletons-detector
+          items:
+          - key: detector
+            path: options.json

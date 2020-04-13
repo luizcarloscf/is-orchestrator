@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: is-gesture-recognizer
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: is-gesture-recognizer
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: zeus
+      containers:
+        - name: is-gesture-recognizer
+          image: luizcarloscf/is-gesture-recognizer:0.0.7
+          command: ["python3"]
+          args: ["src/is_gesture_recognizer/main.py", "/conf/options.json"]
+          imagePullPolicy: Always
+          ports:
+            - name: web
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          resources:
+            limits:
+              cpu: "1"
+              memory: 4096Mi
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: options
+              mountPath: /conf/
+      volumes:
+        - name: options
+          configMap:
+            name: is-gesture-recognizer
+            items:
+              - key: recognizier
+                path: options.json

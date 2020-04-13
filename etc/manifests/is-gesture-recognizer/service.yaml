@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: is-gesture-recognizer
+  labels:
+    app: is-gesture-recognizer
+spec:
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+  selector:
+    app: is-gesture-recognizer

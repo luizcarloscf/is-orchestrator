@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: is-gesture-recognizer
+  labels:
+    app: is-gesture-recognizer
+spec:
+  selector:
+    matchLabels:
+      app: is-gesture-recognizer
+  endpoints:
+    - port: web
+      interval: 5s # scrape the endpoint every X seconds

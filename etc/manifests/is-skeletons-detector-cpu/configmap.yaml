@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: is-skeletons-detector
+  namespace: default
+data:
+  detector: |-
+    {
+      "broker_uri": "amqp://rabbitmq.default",
+      "zipkin_uri": "http://zipkin.default:9411",
+      "resize": {
+        "width": 432,
+        "height": 368
+      },
+      "model": "MOBILENET_THIN",
+      "resize_out_ratio": 4.0,
+      "gpu_mem_allow_growth": true,
+      "per_process_gpu_memory_fraction": 0.25,
+      "period": 5
+    }

@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1 
+kind: Deployment
+metadata:
+  name: "is-skeletons-grouper"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: grouper
+    spec:
+      containers:
+      - name: "0"
+        image: luizcarloscf/is-skeletons-grouper:0.0.4
+        command: ["./service.bin"]
+        args: ["/conf/options_0.json"]
+        imagePullPolicy: Always
+        resources:
+          limits: 
+            cpu: "1"
+            memory: 128Mi
+        volumeMounts:
+          - name: options
+            mountPath: /conf/
+      volumes:
+      - name: options
+        configMap:
+          name: skeletons-grouper
+          items:
+          - key: grouper_0
+            path: options_0.json

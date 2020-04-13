@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: is-gesture-recognizer
+    namespace: default
+data:
+    recognizier: |-
+    {
+        "broker_uri": "amqp://rabbitmq.default",
+        "zipkin_uri": "http://zipkin.default:9411",
+        "group_ids": [
+            0
+        ],
+        "exec_time": 0.0,
+        "skeletons": {
+            "min_keypoints": 8,
+            "x_range": [-1, 1],
+            "y_range": [-1, 1]
+        }
+    }
+    

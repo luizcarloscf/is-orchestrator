@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skeletons-grouper
+  namespace: default
+data:
+  grouper_0: |-
+    {
+      "broker_uri": "amqp://rabbitmq.default",
+      "zipkin_host": "zipkin.default",
+      "zipkin_port": 9411,
+      "id": 0,
+      "cameras": {
+        "0": {},
+        "1": {},
+        "2": {},
+        "3": {},
+      },
+      "referential": 1000,
+      "min_error": 30.0,
+      "min_score": 0.4,
+      "max_distance": 0.85,
+      "period_ms": 1000,
+      "release_samples": 5
+    }
