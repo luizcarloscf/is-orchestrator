@@ -16,7 +16,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
 WORKDIR /opt/is
 COPY src/ src
 COPY setup.py ./
-COPY etc/conf/options.json ./
+COPY etc/conf/ ./etc/conf
 COPY etc/manifests ./etc/manifests 
 
 RUN pip3 install .

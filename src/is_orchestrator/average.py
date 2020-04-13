@@ -10,3 +10,12 @@ class MovingAverage(object):
             self._buffer.pop(0)
             self._buffer.append(value)
         return sum(self._buffer)/self._length
+    
+    @property
+    def length(self):
+        return self._length
+    
+    @length.setter
+    def length(self, num):
+        self._length = num
+    

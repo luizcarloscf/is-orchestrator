@@ -1,0 +1,12 @@
+{
+    "apiVersion": "v1",
+    "kind": "ConfigMap",
+    "metadata": {
+        "name": "skeletons-grouper",
+        "namespace": "default"
+    },
+    "data": {
+        "grouper_0":
+            "{}"
+    }
+}

@@ -6,6 +6,7 @@ import subprocess
 import requests
 import socket
 import json
+import time
 
 def load_json(file_name: str,
               log: Logger):
@@ -64,7 +65,7 @@ def set_fps(fps: float,
 
 def get_metric(name: str,
                prometheus_uri: str = "10.10.2.3:30900"):
-    url = "http://{}/api/v1/query?query={}".format(prometheus_uri,name)
+    url = "http://{}/api/v1/query?query={}".format(prometheus_uri, name)
     data = requests.get(url).json()['data']['result']
     detect_counter = 0
     for elem in data:
@@ -72,14 +73,14 @@ def get_metric(name: str,
     return detect_counter
 
 def k8s_apply(name: str,
-              file: str):
-    kubectl_command = '/usr/bin/kubectl apply -f {}'.format(file)
+              filename: str):
+    kubectl_command = '/usr/bin/kubectl apply -f {}'.format(filename)
     subprocess.call(['bash', '-c', kubectl_command])
-    waiting = "while [[ $(kubectl get pods -n default -l app={} ".format(name)
-    waiting = waiting + "-o 'jsonpath={..status.conditions[?(@.type=='Ready')].status}') != 'True' ]]; do echo 'waiting for pod' && sleep 1; done"
-    subprocess.call(['bash', '-c', waiting])
+    time.sleep(5)
+    
 
 def k8s_delete(name: str,
-               file: str):
-    kubectl_command = '/usr/bin/kubectl delete -f {}'.format(name)
+               filename: str):
+    kubectl_command = '/usr/bin/kubectl delete -f {}'.format(filename)
     subprocess.call(['bash', '-c', kubectl_command])
+    time.sleep(5)
