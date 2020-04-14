@@ -15,6 +15,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'is-wire==1.2.0',
-        'is-msgs==1.1.11'
+        'is-msgs==1.1.11',
+        'kubernetes==11.0.0'
     ],
 )
