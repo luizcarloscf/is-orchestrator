@@ -1,16 +1,16 @@
 apiVersion: extensions/v1beta1 
 kind: Deployment
 metadata:
-  name: "is-skeletons-detector"
+  name: "is-skeletons-cpu"
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: is-skeletons-detector
+        app: is-skeletons-cpu
     spec:
       containers:
-        - name: is-skeletons-detector
+        - name: is-skeletons-cpu
           image: luizcarloscf/is-skeletons-detector:0.0.3
           command: ["is-skeletons-detector-stream"]
           args: ["/opt/is/options.json"]
@@ -35,7 +35,7 @@ spec:
       volumes:
       - name: options
         configMap:
-          name: is-skeletons-detector
+          name: is-skeletons-cpu
           items:
           - key: detector
             path: options.json

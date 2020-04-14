@@ -9,6 +9,13 @@ import json
 
 def main():
 
+    high_processing = False
+    uncertainty = 0.0
+    uncertainty_average = 0.0
+    skeletons_pods_cpu = 0
+    skeletons_pods_gpu = 0
+    fps = 0
+
     logger = Logger(name="is-orchestrator")
 
     grouper_configmap = load_json(file_name="etc/conf/configmap-grouper.json", log=logger)
@@ -24,8 +31,9 @@ def main():
     average_sks = MovingAverage(length=10)
     average_unc = MovingAverage(length=10)
 
-    pods = Pods(config_file="/root/.kube/config")
+    pods = Pods(config_file=options['config_file'])
 
+    # waiting for a response of the cameras
     while True:
         fps = get_fps(camera=0,
                     publish_channel=publish_channel,
@@ -34,53 +42,62 @@ def main():
                     logger=logger)
         if fps is not None:
             break
-
-    fps = 1
+    
+    # setting initial condition
+    fps = options['fps']['min']
     set_fps(fps=fps,
             camera=0,
             consumer_channel=consumer_channel,
             publish_channel=publish_channel,
             subscription=subscription,
             logger=logger)
-    last_change = time.time()
-
-
     k8s_apply(name="is-skeletons-detector",
               filename="etc/manifests/is-skeletons-detector-cpu")
+    last_change = time.time()
     
-    high_processing = False
 
     while True:
-
-        skeletons = get_metric(name="skeletons")
+        
+        # number of skeletons
+        skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
+        
+        # number of skeletons on a moving average
         skeletons_average = average_sks.calculate(skeletons)
-        skeletos_pods = pods.count_pods(pod_name="is-skeletons-detector")
 
         if high_processing is False and skeletons_average <= 1:
+            uncertainty = 0
+            uncertainty_average = average_unc.calculate(uncertainty)
             pass
         
         elif high_processing is False and skeletons_average >= 1:
             high_processing = True
+
             k8s_delete(name="is-skeletons-detector",
                        filename="etc/manifests/is-skeletons-detector-cpu")
+            logger.info("is-skeletons-detector-cpu deleted")
+
             k8s_apply(name="is-skeletons-detector",
                       filename="etc/manifests/is-skeletons-detector-gpu")
+            logger.info("is-skeletons-detector-gpu created")
+
             k8s_apply(name="is-skeletons-grouper",
                       filename="etc/manifests/is-skeletons-grouper")
+            logger.info("is-skeletons-grouper created")
+
             k8s_apply(name="is-gesture-recognizer",
                       filename="etc/manifests/is-gesture-recognizer")
+            logger.info("is-gesture-recognizer created")
+            
             last_change = time.time()
 
         elif high_processing is True and skeletons_average >= 1:
 
-            uncertainty = get_metric(name="uncertainty")
+            uncertainty = get_metric(name="uncertainty", prometheus_uri=options['prometheus_uri'])
             uncertainty_average = average_unc.calculate(uncertainty)
-            
             dt = time.time() - last_change
+            if uncertainty_average >= options['uncertainty_threshold'] and fps < options['fps']['max'] and dt > options['mininal_time']:
 
-            if uncertainty_average >= 1 and fps < 10 and dt > 60:
-
-                last_change = time.time()
+                # increase FPS
                 fps += 1
                 set_fps(fps=fps,
                         camera=0,
@@ -88,36 +105,58 @@ def main():
                         publish_channel=publish_channel,
                         subscription=subscription,
                         logger=logger)
-
+                
+                # edit is-skeletons-grouper configmap
                 grouper_options["period_ms"] = int((1 / fps) * 1000)
                 grouper_configmap["data"]["grouper_0"] = json.dumps(options)
                 with open('./etc/conf/configmap-grouper.json', 'w') as f:
                     json.dump(grouper_configmap, f, ensure_ascii=False, indent=4)
 
+                # apply new is-skeletons-grouper configmap
                 k8s_apply(name="configmap-grouper", filename="etc/conf/configmap-grouper.json")
+                # renew deployment of is-skeletons-grouper
                 k8s_delete(name="is-skeletons-grouper", filename="etc/manifests/is-skeletons-grouper/deploy.yaml")
                 k8s_apply(name="is-skeletons-grouper", filename="etc/manifests/is-skeletons-grouper/deploy.yaml")
+                logger.info("Deployment is-skeletons-grouper edited!")
+                last_change = time.time()
 
         
         elif high_processing is True and skeletons_average <= 1:
             high_processing = False
+            uncertainty = 0
+            uncertainty_average = average_unc.calculate(uncertainty)
+
             k8s_delete(name="is-skeletons-detector",
                        filename="etc/manifests/is-skeletons-detector-gpu")
+            logger.info("deployment is-skeletons-detector-gpu deleted")
+
             k8s_delete(name="is-skeletons-grouper",
                        filename="etc/manifests/is-skeletons-grouper")
+            logger.info("deployment is-skeletons-grouper deleted")
+
             k8s_delete(name="is-gesture-recognizer",
                        filename="etc/manifests/is-gesture-recognizer")
+            logger.info("deployment is-gesture-recognizer deleted")
+
             k8s_apply(name="is-skeletons-detector",
                       filename="etc/manifests/is-skeletons-detector-cpu")
+            logger.info("deployment is-skeletons-detector-cpu created")
 
+        # number of skeletons pods
+        skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu")
+        skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector")
 
         info = {
+            "fps": fps,
+            "uncertainty": uncertainty,
+            "uncertainty_average": uncertainty_average,
             "skeletons": skeletons,
             "skeletons_average": skeletons_average,
-            "skeletons_pods": skeletos_pods
+            "skeletons_pods_cpu": skeletons_pods_cpu,
+            "skeletons_pods_gpu": skeletons_pods_gpu
         }
         logger.info('{}', str(info).replace("'", '"'))
-        time.sleep(2)
+        time.sleep(5)
 
 
 

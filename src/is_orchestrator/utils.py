@@ -60,7 +60,7 @@ def set_fps(fps: float,
         reply = consumer_channel.consume(timeout=timeout)
         logger.info('Change FPS of camera {}, RPC Status: {}', camera, reply.status)
     except socket.timeout:
-        logger.info('No reply from camera {}', camera)
+        logger.critical('No reply from camera {}', camera)
 
 
 def get_metric(name: str,
@@ -74,7 +74,7 @@ def get_metric(name: str,
 
 def k8s_apply(name: str,
               filename: str):
-    kubectl_command = '/usr/bin/kubectl apply -f {}'.format(filename)
+    kubectl_command = '/usr/bin/kubectl apply -f {} > /dev/null 2>&1'.format(filename)
     subprocess.call(['bash', '-c', kubectl_command])
     time.sleep(5)
     
@@ -82,5 +82,5 @@ def k8s_apply(name: str,
 def k8s_delete(name: str,
                filename: str):
     kubectl_command = '/usr/bin/kubectl delete -f {}'.format(filename)
-    subprocess.call(['bash', '-c', kubectl_command])
+    subprocess.call(['bash', '-c', kubectl_command, '> /dev/null 2>&1'])
     time.sleep(5)

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: "is-skeletons-detector"
 spec:
-  replicas: 4
+  replicas: 1
   template:
     metadata:
       labels:

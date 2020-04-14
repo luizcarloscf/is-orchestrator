@@ -1,13 +1,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: is-skeletons-detector
+  name: is-skeletons-cpu
   labels:
-    app: is-skeletons-detector
+    app: is-skeletons-cpu
 spec:
   selector:
     matchLabels:
-      app: is-skeletons-detector
+      app: is-skeletons-cpu
   endpoints:
     - port: web
       interval: 5s # scrape the endpoint every X seconds

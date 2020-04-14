@@ -1,17 +1,11 @@
 {
     "broker_uri": "amqp://rabbitmq.default",
-    "prometheus_uri": "http://localhost:30900",
-    "cameras": {
-        "group_id": 0,
-        "id": [
-            0,
-            1,
-            2,
-            3
-        ],
-        "fps": {
+    "prometheus_uri": "http://10.10.2.3:30900",
+    "fps": {
             "min": 1,
             "max": 10
-        }
-    } 
+        },
+    "config_file": "/root/.kube/config",
+    "uncertainty_threshold": 1,
+    "minimal_time": 120
 }
