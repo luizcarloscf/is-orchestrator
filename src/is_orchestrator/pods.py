@@ -1,4 +1,5 @@
 import re
+from is_wire.core import Logger
 from kubernetes import client, config
 
 class Pods(object):
@@ -15,7 +16,8 @@ class Pods(object):
         results = list()
         for pod in pods:
             result = re.match (r"^is-([a-z]+[-]+[a-z]*)", pod)
-            results.append(result.group(0))
+            if result is not None:
+                results.append(result.group(0))
         return results.count(pod_name)
 
 
