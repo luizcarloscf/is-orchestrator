@@ -7,6 +7,8 @@ import requests
 import socket
 import json
 import time
+import sys
+import os
 
 def load_json(file_name: str,
               log: Logger):
@@ -84,3 +86,42 @@ def k8s_delete(name: str,
     kubectl_command = '/usr/bin/kubectl delete -f {}'.format(filename)
     subprocess.call(['bash', '-c', kubectl_command, '> /dev/null 2>&1'])
     time.sleep(5)
+
+def create_folder(dirname: str,
+                  filename: str,
+                  log: Logger):
+
+    # Create target directory & all intermediate directories if don't exists
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+        log.info("Directory: {} Created", dirname)
+    else:
+        log.info("Directory: {} already exists", dirname)
+
+    if os.path.isfile('{}/{}'.format(dirname, filename)):
+        log.warn(
+            "File {} already exists on directory {}.\nWould you like to proceed? All data will be deleted! [y/n]",
+            filename, dirname)
+        key = input()
+        if key == 'y':
+            os.remove('{}/{}'.format(dirname, filename))
+        elif key == 'n':
+            sys.exit(0)
+        else:
+            log.critical('Invalid command \'{}\', exiting.', key)
+            sys.exit(-1)
+    else:
+        log.info("File not exist")
+
+    with open("{}/{}".format(dirname, filename), "w+") as f:
+        f.write('timestamp,fps,uncertainty,pod_skeletons_cpu,pod_skeletons_gpu\n')
+
+def put_data(timestamp: float,
+             fps: int,
+             uncertainty: float,
+             pod_skeletons_cpu: int,
+             pod_skeletons_gpu: int,
+             dirname: str,
+             filename: str):
+    with open("{}/{}".format(dirname, filename), "a") as f:
+        f.write('{},{},{},{},{}\n'.format(timestamp, fps, uncertainty, pod_skeletons_cpu, pod_skeletons_gpu))

@@ -1,7 +1,7 @@
 from is_wire.core import Channel, Subscription, Message, Logger
-from .utils import load_json, get_fps, set_fps, get_metric, k8s_apply, k8s_delete
-from .average import MovingAverage
-from .pods import Pods
+from utils import load_json, get_fps, set_fps, get_metric, k8s_apply, k8s_delete, create_folder, put_data
+from average import MovingAverage
+from pods import Pods
 import time
 import sys
 import json
@@ -23,6 +23,8 @@ def main():
 
     options_file = sys.argv[1] if len(sys.argv) > 1 else "etc/conf/options.json"
     options = load_json(options_file, logger)
+
+    create_folder(filename=options['file_name'], dirname=options['folder'])
 
     publish_channel = Channel(options["broker_uri"])
     consumer_channel = Channel(options["broker_uri"])
@@ -54,7 +56,7 @@ def main():
     k8s_apply(name="is-skeletons-detector",
               filename="etc/manifests/is-skeletons-detector-cpu")
     last_change = time.time()
-    
+    start_time = time.time()
 
     while True:
         
@@ -145,6 +147,14 @@ def main():
         # number of skeletons pods
         skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu")
         skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector")
+
+        put_data(timestamp=(time.time() - start_time),
+                 fps=fps,
+                 uncertainty=uncertainty_average,
+                 pod_skeletons_cpu=skeletons_pods_cpu,
+                 pod_skeletons_gpu=skeletons_pods_gpu,
+                 dirname=options["folder"],
+                 filename=options["file_name"])
 
         info = {
             "fps": fps,

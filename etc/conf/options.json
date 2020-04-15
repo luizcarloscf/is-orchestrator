@@ -6,6 +6,8 @@
             "max": 10
         },
     "config_file": "/root/.kube/config",
+    "folder": "/home/",
+    "file_name": "test.csv",
     "uncertainty_threshold": 1,
     "minimal_time": 120
 }
