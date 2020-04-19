@@ -74,19 +74,6 @@ def get_metric(name: str,
         detect_counter += float(elem['value'][1])/len(data)
     return detect_counter
 
-def k8s_apply(name: str,
-              filename: str):
-    kubectl_command = '/usr/bin/kubectl apply -f {} > /dev/null 2>&1'.format(filename)
-    subprocess.call(['bash', '-c', kubectl_command])
-    time.sleep(5)
-    
-
-def k8s_delete(name: str,
-               filename: str):
-    kubectl_command = '/usr/bin/kubectl delete -f {}'.format(filename)
-    subprocess.call(['bash', '-c', kubectl_command, '> /dev/null 2>&1'])
-    time.sleep(5)
-
 def create_folder(dirname: str,
                   filename: str,
                   log: Logger):

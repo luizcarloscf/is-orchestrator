@@ -1,5 +1,6 @@
 from is_wire.core import Channel, Subscription, Message, Logger
-from utils import load_json, get_fps, set_fps, get_metric, k8s_apply, k8s_delete, create_folder, put_data
+from utils import load_json, get_fps, set_fps, get_metric, create_folder, put_data
+from orchestrator import Orchestrator
 from average import MovingAverage
 from pods import Pods
 import time
@@ -8,14 +9,7 @@ import json
 
 
 def main():
-
-    high_processing = False
-    uncertainty = 0.0
-    uncertainty_average = 0.0
-    skeletons_pods_cpu = 0
-    skeletons_pods_gpu = 0
-    fps = 0
-
+ 
     logger = Logger(name="is-orchestrator")
 
     grouper_configmap = load_json(file_name="etc/conf/configmap-grouper.json", log=logger)
@@ -53,56 +47,39 @@ def main():
             publish_channel=publish_channel,
             subscription=subscription,
             logger=logger)
-    k8s_apply(name="is-skeletons-detector",
-              filename="etc/manifests/is-skeletons-detector-cpu")
-    time.sleep(120)
+    orchestrator = Orchestrator(grouper_configmap=grouper_configmap,
+                                grouper_options=grouper_options,
+                                grouper_configmap_file="etc/conf/configmap-grouper.json",
+                                log=logger,
+                                waiting_time=options['waiting_time'],
+                                skeletons_cpu_folder=options['skeletons_detector_cpu_folder'],
+                                skeletons_gpu_folder=options['skeletons_detector_gpu_folder'],
+                                skeletons_grouper_folder=options['skeletons_grouper_folder'],
+                                gesture_recognizer_folder=options['gesture_recognizer_folder'])
+    fast_processing = False
+    uncertainty = 0.0
     last_change = time.time()
-    start_time = time.time()
+    start_time = time.time() 
 
     while True:
-        
-        # number of skeletons
-        skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
-        
-        # number of skeletons on a moving average
+        skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri']) 
         skeletons_average = average_sks.calculate(skeletons)
 
-        if high_processing is False and skeletons_average <= 1:
-            uncertainty = 0
+        if fast_processing is False and skeletons_average < options['skeletons']:
             uncertainty_average = average_unc.calculate(uncertainty)
-            pass
         
-        elif high_processing is False and skeletons_average >= 1:
-            high_processing = True
-
-            k8s_delete(name="is-skeletons-detector",
-                       filename="etc/manifests/is-skeletons-detector-cpu")
-            logger.info("is-skeletons-detector-cpu deleted")
-
-            k8s_apply(name="is-skeletons-detector",
-                      filename="etc/manifests/is-skeletons-detector-gpu")
-            logger.info("is-skeletons-detector-gpu created")
-
-            k8s_apply(name="is-skeletons-grouper",
-                      filename="etc/manifests/is-skeletons-grouper")
-            logger.info("is-skeletons-grouper created")
-
-            k8s_apply(name="is-gesture-recognizer",
-                      filename="etc/manifests/is-gesture-recognizer")
-            logger.info("is-gesture-recognizer created")
-            
-            time.sleep(120)
+        elif fast_processing is False and skeletons_average >= 1:
+            fast_processing = True
+            orchestrator.fast_processing()            
             last_change = time.time()
             continue
 
-        elif high_processing is True and skeletons_average >= 1:
-
+        elif fast_processing is True and skeletons_average > (options['skeletons'] - options['tolerance']):
             uncertainty = get_metric(name="uncertainty_total", prometheus_uri=options['prometheus_uri'])
             uncertainty_average = average_unc.calculate(uncertainty)
             dt = time.time() - last_change
-            if uncertainty_average >= options['uncertainty_threshold'] and fps < options['fps']['max'] and dt > options['minimal_time']:
 
-                # increase FPS
+            if uncertainty_average >= options['uncertainty_threshold'] and fps < options['fps']['max'] and dt > options['last_change_time']:
                 fps += 1
                 set_fps(fps=fps,
                         camera=0,
@@ -110,45 +87,18 @@ def main():
                         publish_channel=publish_channel,
                         subscription=subscription,
                         logger=logger)
-                
-                # edit is-skeletons-grouper configmap
-                grouper_options["period_ms"] = int((1 / fps) * 1000)
-                grouper_configmap["data"]["grouper_0"] = json.dumps(grouper_options)
-                with open('./etc/conf/configmap-grouper.json', 'w') as f:
-                    json.dump(grouper_configmap, f, ensure_ascii=False, indent=4)
-
-                # apply new is-skeletons-grouper configmap
-                k8s_apply(name="configmap-grouper", filename="etc/conf/configmap-grouper.json")
-                # renew deployment of is-skeletons-grouper
-                k8s_delete(name="is-skeletons-grouper", filename="etc/manifests/is-skeletons-grouper/deployment.yaml")
-                k8s_apply(name="is-skeletons-grouper", filename="etc/manifests/is-skeletons-grouper/deployment.yaml")
-                logger.info("Deployment is-skeletons-grouper edited!")
+                orchestrator.edit_grouper(fps=fps)
                 last_change = time.time()
                 continue
 
         
-        elif high_processing is True and skeletons_average < 0.5:
-            high_processing = False
-            uncertainty = 0
-            uncertainty_average = average_unc.calculate(uncertainty)
-
-            k8s_delete(name="is-skeletons-detector",
-                       filename="etc/manifests/is-skeletons-detector-gpu")
-            logger.info("deployment is-skeletons-detector-gpu deleted")
-
-            k8s_delete(name="is-skeletons-grouper",
-                       filename="etc/manifests/is-skeletons-grouper")
-            logger.info("deployment is-skeletons-grouper deleted")
-
-            k8s_delete(name="is-gesture-recognizer",
-                       filename="etc/manifests/is-gesture-recognizer")
-            logger.info("deployment is-gesture-recognizer deleted")
-
-            k8s_apply(name="is-skeletons-detector",
-                      filename="etc/manifests/is-skeletons-detector-cpu")
-            logger.info("deployment is-skeletons-detector-cpu created")
+        elif fast_processing is True and skeletons_average <= (options['skeletons'] - options['tolerance']):
+            orchestrator.slow_processing()
+            fast_processing = False
+            uncertainty = 0.0
+            last_change = time.time()
             continue
-        # number of skeletons pods
+
         skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu")
         skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector")
 
@@ -170,8 +120,7 @@ def main():
             "skeletons_pods_gpu": skeletons_pods_gpu
         }
         logger.info('{}', str(info).replace("'", '"'))
-        time.sleep(5)
-
+        time.sleep()
 
 
 if __name__ == '__main__':
