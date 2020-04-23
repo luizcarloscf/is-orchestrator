@@ -56,13 +56,28 @@ def main():
                                 skeletons_gpu_folder=options['skeletons_detector_gpu_folder'],
                                 skeletons_grouper_folder=options['skeletons_grouper_folder'],
                                 gesture_recognizer_folder=options['gesture_recognizer_folder'])
+    
+   
+    skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
+
+    msgs_rate_skeletons = get_metric(name='rate(rabbitmq_queue_messages_published_total{namespace!="",queue="SkeletonsDetector.Detection"}[1m])/rabbitmq_queue_consumers{namespace!="",queue="SkeletonsDetector.Detection"}',
+                            prometheus_uri=options['prometheus_uri'])
+
     fast_processing = False
     uncertainty = 0.0
     last_change = time.time()
     start_time = time.time() 
-
+    
     while True:
-        skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri']) 
+        
+        msgs_rate_skeletons = get_metric(name='rate(rabbitmq_queue_messages_published_total{namespace!="",queue="SkeletonsDetector.Detection"}[1m])/rabbitmq_queue_consumers{namespace!="",queue="SkeletonsDetector.Detection"}',
+                                         prometheus_uri=options['prometheus_uri'])
+       
+       
+      
+        skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
+        
+        
         skeletons_average = average_sks.calculate(skeletons)
 
         if fast_processing is False and skeletons_average < options['skeletons']:
@@ -70,12 +85,18 @@ def main():
         
         elif fast_processing is False and skeletons_average >= 1:
             fast_processing = True
-            orchestrator.fast_processing()            
+            orchestrator.fast_processing()
+            
+            skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
+            
+            uncertainty = get_metric(name="uncertainty_total", prometheus_uri=options['prometheus_uri'])
+            
             last_change = time.time()
             continue
 
         elif fast_processing is True and skeletons_average > (options['skeletons'] - options['tolerance']):
             uncertainty = get_metric(name="uncertainty_total", prometheus_uri=options['prometheus_uri'])
+            
             uncertainty_average = average_unc.calculate(uncertainty)
             dt = time.time() - last_change
 
@@ -94,6 +115,8 @@ def main():
         
         elif fast_processing is True and skeletons_average <= (options['skeletons'] - options['tolerance']):
             orchestrator.slow_processing()
+            skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
+            
             fast_processing = False
             uncertainty = 0.0
             last_change = time.time()
@@ -101,10 +124,13 @@ def main():
 
         skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu")
         skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector")
+        
 
         put_data(timestamp=(time.time() - start_time),
                  fps=fps,
-                 uncertainty=uncertainty_average,
+                 uncertainty_filtered=uncertainty_average,
+                 skeletons_filtered=skeletons_average,
+                 skeletons_msgs_rate=msgs_rate_skeletons,
                  pod_skeletons_cpu=skeletons_pods_cpu,
                  pod_skeletons_gpu=skeletons_pods_gpu,
                  dirname=options["folder"],
@@ -116,6 +142,7 @@ def main():
             "uncertainty_average": uncertainty_average,
             "skeletons": skeletons,
             "skeletons_average": skeletons_average,
+            "msgs_rate_skeletons": msgs_rate_skeletons,
             "skeletons_pods_cpu": skeletons_pods_cpu,
             "skeletons_pods_gpu": skeletons_pods_gpu
         }
