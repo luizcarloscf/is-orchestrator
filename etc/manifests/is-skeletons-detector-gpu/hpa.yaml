@@ -7,7 +7,7 @@ spec:
     apiVersion: extensions/v1beta1
     kind: Deployment
     name: is-skeletons-detector
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 4
   metrics:
     - type: Object
