@@ -41,12 +41,15 @@ def main():
     
     # setting initial condition
     fps = options['fps']['min']
+    
     set_fps(fps=fps,
             camera=0,
             consumer_channel=consumer_channel,
             publish_channel=publish_channel,
             subscription=subscription,
             logger=logger)
+
+
     orchestrator = Orchestrator(grouper_configmap=grouper_configmap,
                                 grouper_options=grouper_options,
                                 grouper_configmap_file="etc/conf/configmap-grouper.json",
@@ -116,7 +119,14 @@ def main():
         elif fast_processing is True and skeletons_average <= (options['skeletons'] - options['tolerance']):
             orchestrator.slow_processing()
             skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
-            
+            fps = 1
+            set_fps(fps=fps,
+                    camera=0,
+                    consumer_channel=consumer_channel,
+                    publish_channel=publish_channel,
+                    subscription=subscription,
+                    logger=logger)
+
             fast_processing = False
             uncertainty = 0.0
             last_change = time.time()
@@ -147,7 +157,7 @@ def main():
             "skeletons_pods_gpu": skeletons_pods_gpu
         }
         logger.info('{}', str(info).replace("'", '"'))
-        time.sleep()
+        time.sleep(3)
 
 
 if __name__ == '__main__':

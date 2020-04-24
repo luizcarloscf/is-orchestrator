@@ -11,8 +11,9 @@
         },
     "config_file": "/localhome/baca/.kube/config",
     "folder": "/localhome/baca/is-orchestrator-data/",
-    "file_name": "ufes_20200418.csv",
+    "file_name": "ufes_20200424.csv",
     "skeletons": 1,
+    "tolerance": 0.5,
     "uncertainty_threshold": 1,
     "waiting_time": 20,
     "last_change_time": 120

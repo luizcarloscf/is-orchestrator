@@ -65,8 +65,7 @@ def set_fps(fps: float,
         logger.critical('No reply from camera {}', camera)
 
 
-def get_metric(self,
-                name: str,
+def get_metric( name: str,
                 prometheus_uri: str = "10.10.2.3:30900",
                 timeout: float = 240.0,
                 get_every_seconds: float = 2):

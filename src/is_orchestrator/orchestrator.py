@@ -38,7 +38,7 @@ class Orchestrator(object):
         self._log.info('{}', str(info).replace("'", '"'))
     
     def _delete(self, name, file_name):
-        kubectl_command = '/usr/bin/kubectl apply -f {} > /dev/null 2>&1'.format(file_name)
+        kubectl_command = '/usr/bin/kubectl delete -f {} > /dev/null 2>&1'.format(file_name)
         subprocess.call(['bash', '-c', kubectl_command])
         info = {
             "service_name" : name,
