@@ -141,10 +141,9 @@ def main():
             last_change = time.time()
             continue
 
-        skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu")
-        skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector")
+        skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu", regex_match=options["regex_match"])
+        skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector", regex_match=options["regex_match"])
         
-
         put_data(timestamp=(time.time() - start_time),
                  fps=fps,
                  uncertainty_filtered=uncertainty_average,
