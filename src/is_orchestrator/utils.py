@@ -11,12 +11,14 @@ import sys
 import os
 
 def load_json(file_name: str,
-              log: Logger):
+              log: Logger,
+              show: bool = False):
     try:
         with open(file_name, 'r') as f:
             try:
                 op = json.load(f)
-                log.info('Loaded options: \n{}', op)
+                if show is True:
+                    log.info('Loaded options: \n{}', op)
                 return op
             except Exception as ex:
                 log.critical('Unable to load options from \'{}\'. \n{}', file_name, ex)

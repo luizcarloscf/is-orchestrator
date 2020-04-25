@@ -12,11 +12,16 @@ def main():
  
     logger = Logger(name="is-orchestrator")
 
-    grouper_configmap = load_json(file_name="etc/conf/configmap-grouper.json", log=logger)
-    grouper_options = load_json(file_name="etc/conf/options-grouper.json", log=logger)
-
+    grouper_configmap = load_json(file_name="etc/conf/configmap-grouper.json",
+                                  log=logger,
+                                  show=False)
+    grouper_options = load_json(file_name="etc/conf/options-grouper.json",
+                                log=logger,
+                                show=False)
     options_file = sys.argv[1] if len(sys.argv) > 1 else "etc/conf/options.json"
-    options = load_json(options_file, logger)
+    options = load_json(file_name=options_file,
+                        log=logger,
+                        show=True)
 
     create_folder(filename=options['file_name'], dirname=options['folder'], log=logger)
 
@@ -41,15 +46,13 @@ def main():
     
     # setting initial condition
     fps = options['fps']['min']
-    
+
     set_fps(fps=fps,
             camera=0,
             consumer_channel=consumer_channel,
             publish_channel=publish_channel,
             subscription=subscription,
             logger=logger)
-
-
     orchestrator = Orchestrator(grouper_configmap=grouper_configmap,
                                 grouper_options=grouper_options,
                                 grouper_configmap_file="etc/conf/configmap-grouper.json",
@@ -63,8 +66,12 @@ def main():
    
     skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
 
-    msgs_rate_skeletons = get_metric(name='rate(rabbitmq_queue_messages_published_total{namespace!="",queue="SkeletonsDetector.Detection"}[1m])/rabbitmq_queue_consumers{namespace!="",queue="SkeletonsDetector.Detection"}',
-                            prometheus_uri=options['prometheus_uri'])
+    filter_by = '{namespace="orchestrator",queue="SkeletonsDetector.Detection"}'
+    msgs_rate_skeletons = get_metric(name='rate(rabbitmq_queue_messages_published_total'
+                                            + filter_by + '[1m])'
+                                            + '/rabbitmq_queue_consumers'
+                                            + filter_by,
+                                     prometheus_uri=options['prometheus_uri'])
 
     fast_processing = False
     uncertainty = 0.0
@@ -73,7 +80,10 @@ def main():
     
     while True:
         
-        msgs_rate_skeletons = get_metric(name='rate(rabbitmq_queue_messages_published_total{namespace!="",queue="SkeletonsDetector.Detection"}[1m])/rabbitmq_queue_consumers{namespace!="",queue="SkeletonsDetector.Detection"}',
+        msgs_rate_skeletons = get_metric(name='rate(rabbitmq_queue_messages_published_total'
+                                            + filter_by + '[1m])'
+                                            + '/rabbitmq_queue_consumers'
+                                            + filter_by,
                                          prometheus_uri=options['prometheus_uri'])
        
        
@@ -91,7 +101,6 @@ def main():
             orchestrator.fast_processing()
             
             skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
-            
             uncertainty = get_metric(name="uncertainty_total", prometheus_uri=options['prometheus_uri'])
             
             last_change = time.time()

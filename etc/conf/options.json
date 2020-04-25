@@ -16,5 +16,6 @@
     "tolerance": 0.5,
     "uncertainty_threshold": 1,
     "waiting_time": 20,
-    "last_change_time": 120
+    "last_change_time": 120,
+    "regex_match": "^is-([a-z]+[-]+[a-z]*)"
 }
