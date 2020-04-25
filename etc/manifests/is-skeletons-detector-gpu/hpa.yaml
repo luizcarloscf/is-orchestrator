@@ -2,6 +2,7 @@ kind: HorizontalPodAutoscaler
 apiVersion: autoscaling/v2beta1
 metadata:
   name: is-skeletons-detector
+  namespace: orchestrator
 spec:
   scaleTargetRef:
     apiVersion: extensions/v1beta1

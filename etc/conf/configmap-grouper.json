@@ -3,9 +3,9 @@
     "kind": "ConfigMap",
     "metadata": {
         "name": "skeletons-grouper",
-        "namespace": "default"
+        "namespace": "orchestrator"
     },
     "data": {
-        "grouper_0": "{\"broker_uri\": \"amqp://rabbitmq.default\", \"zipkin_host\": \"zipkin.default\", \"zipkin_port\": 9411, \"id\": 0, \"cameras\": {\"0\": {\"vertices\": [{\"x\": 0.2, \"y\": 0.0}, {\"x\": 0.8, \"y\": 1.0}]}, \"1\": {\"vertices\": [{\"x\": 0.2, \"y\": 0.0}, {\"x\": 0.8, \"y\": 1.0}]}, \"2\": {\"vertices\": [{\"x\": 0.2, \"y\": 0.0}, {\"x\": 0.8, \"y\": 1.0}]}, \"3\": {\"vertices\": [{\"x\": 0.2, \"y\": 0.0}, {\"x\": 0.8, \"y\": 1.0}]}}, \"referential\": 1000, \"min_error\": 30.0, \"min_score\": 0.4, \"max_distance\": 0.85, \"period_ms\": 166, \"release_samples\": 5}"
+        "grouper_0": "{}"
     }
 }

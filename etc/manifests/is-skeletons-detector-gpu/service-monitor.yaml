@@ -2,6 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: is-skeletons-detector
+  namespace: orchestrator
   labels:
     app: is-skeletons-detector
 spec:

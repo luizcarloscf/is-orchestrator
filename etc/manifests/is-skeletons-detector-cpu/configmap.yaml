@@ -2,12 +2,12 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: is-skeletons-cpu
-  namespace: default
+  namespace: orchestrator
 data:
   detector: |-
     {
-      "broker_uri": "amqp://rabbitmq.default",
-      "zipkin_uri": "http://zipkin.default:9411",
+      "broker_uri": "amqp://rabbitmq.orchestrator",
+      "zipkin_uri": "http://zipkin.orchestrator:9411",
       "resize": {
         "width": 432,
         "height": 368

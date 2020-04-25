@@ -18,7 +18,8 @@ COPY src/ src
 COPY setup.py ./
 COPY etc/conf/ ./etc/conf
 COPY etc/manifests ./etc/manifests 
+COPY requirements.txt ./requirements.txt
 
-RUN pip3 install .
+RUN pip3 install -r requirements.txt
 
 CMD ["is-orchestrator"]

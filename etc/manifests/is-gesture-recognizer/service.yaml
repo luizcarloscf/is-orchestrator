@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: is-gesture-recognizer
+  namespace: orchestrator
   labels:
     app: is-gesture-recognizer
 spec:
