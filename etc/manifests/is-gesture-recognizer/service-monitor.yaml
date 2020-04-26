@@ -2,10 +2,12 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: is-gesture-recognizer
-  namespace: orchestrator
   labels:
     app: is-gesture-recognizer
 spec:
+  namespaceSelector:
+    matchNames:
+      - orchestrator
   selector:
     matchLabels:
       app: is-gesture-recognizer
