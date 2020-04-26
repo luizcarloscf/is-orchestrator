@@ -2,10 +2,12 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: is-skeletons-cpu
-  namespace: orchestrator
   labels:
     app: is-skeletons-cpu
 spec:
+  namespaceSelector:
+    matchNames:
+      - orchestrator
   selector:
     matchLabels:
       app: is-skeletons-cpu
