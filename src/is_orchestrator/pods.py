@@ -14,9 +14,10 @@ class Pods(object):
 
     def count_pods(self,
                    pod_name: str = "is-skeletons-detector",
-                   regex_match: str = "^is-([a-z]+[-]+[a-z]*)"):
+                   regex_match: str = "^is-([a-z]+[-]+[a-z]*)",
+                   namespace: str = "default"):
 
-        pods = self.get_pods(namespace="default")
+        pods = self.get_pods(namespace=namespace)
         results = list()
         for pod in pods:
             result = re.match (r"{}".format(regex_match), pod)

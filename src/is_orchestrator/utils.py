@@ -71,8 +71,8 @@ def get_metric( name: str,
                 prometheus_uri: str = "10.10.2.3:30900",
                 timeout: float = 240.0,
                 get_every_seconds: float = 2):
+   
     url = "http://{}/api/v1/query?query={}".format(prometheus_uri, name)
-    
     start = time.time()
 
     # simple timeout function
@@ -118,7 +118,7 @@ def create_folder(dirname: str,
         log.info("File not exist")
 
     with open("{}/{}".format(dirname, filename), "w+") as f:
-        f.write('timestamp,fps,uncertainty,pod_skeletons_cpu,pod_skeletons_gpu\n')
+        f.write('time,fps,uncertainty,skeletons,rabbitmq_msgs_per_second_skeletons,pod_skeletons_cpu,pod_skeletons_gpu\n')
 
 def put_data(timestamp: float,
              fps: int,

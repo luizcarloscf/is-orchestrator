@@ -1,6 +1,6 @@
 {
-    "broker_uri": "amqp://rabbitmq.default",
-    "zipkin_host": "zipkin.default",
+    "broker_uri": "amqp://rabbitmq.orchestrator",
+    "zipkin_host": "zipkin.orchestrator",
     "zipkin_port": 9411,
     "id": 0,
     "cameras": {

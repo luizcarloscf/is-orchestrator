@@ -3,7 +3,7 @@
     "skeletons_detector_gpu_folder": "etc/manifests/is-skeletons-detector-gpu",
     "skeletons_grouper_folder": "etc/manifests/is-skeletons-grouper",
     "gesture_recognizer_folder": "etc/manifests/is-gesture-recognizer",
-    "broker_uri": "amqp://10.10.2.3:30000",
+    "broker_uri": "amqp://10.10.2.3:30005",
     "prometheus_uri": "10.10.2.3:30900",
     "fps": {
             "min": 1,
@@ -11,7 +11,7 @@
         },
     "config_file": "/localhome/baca/.kube/config",
     "folder": "/localhome/baca/is-orchestrator-data/",
-    "file_name": "ufes_20200424.csv",
+    "file_name": "ufes_20200426_limited_2.csv",
     "skeletons": 1,
     "tolerance": 0.5,
     "uncertainty_threshold": 1,

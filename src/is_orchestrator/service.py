@@ -66,7 +66,7 @@ def main():
    
     skeletons = get_metric(name="skeletons", prometheus_uri=options['prometheus_uri'])
 
-    filter_by = '{namespace="orchestrator",queue="SkeletonsDetector.Detection"}'
+    filter_by = '{namespace!="",queue="SkeletonsDetector.Detection"}'
     msgs_rate_skeletons = get_metric(name='rate(rabbitmq_queue_messages_published_total'
                                             + filter_by + '[1m])'
                                             + '/rabbitmq_queue_consumers'
@@ -112,7 +112,7 @@ def main():
             uncertainty_average = average_unc.calculate(uncertainty)
             dt = time.time() - last_change
 
-            if uncertainty_average >= options['uncertainty_threshold'] and fps < options['fps']['max'] and dt > options['last_change_time']:
+            if fps < options['fps']['max'] and dt > options['last_change_time']:
                 fps += 1
                 set_fps(fps=fps,
                         camera=0,
@@ -141,8 +141,8 @@ def main():
             last_change = time.time()
             continue
 
-        skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu", regex_match=options["regex_match"])
-        skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector", regex_match=options["regex_match"])
+        skeletons_pods_cpu = pods.count_pods(pod_name="is-skeletons-cpu", namespace="orchestrator", regex_match=options["regex_match"])
+        skeletons_pods_gpu = pods.count_pods(pod_name="is-skeletons-detector", namespace="orchestrator", regex_match=options["regex_match"])
         
         put_data(timestamp=(time.time() - start_time),
                  fps=fps,
