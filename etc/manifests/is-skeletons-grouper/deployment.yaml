@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: "0"
-        image: luizcarloscf/is-skeletons-grouper:0.0.4
+        image: luizcarloscf/is-skeletons-grouper:0.0.5
         command: ["./service.bin"]
         args: ["/conf/options_0.json"]
         imagePullPolicy: Always
