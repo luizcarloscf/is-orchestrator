@@ -4,7 +4,7 @@ metadata:
   name: "is-skeletons-detector"
   namespace: orchestrator
 spec:
-  replicas: 2
+  replicas: 2 
   template:
     metadata:
       labels:
@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: is-skeletons-detector
-          image: luizcarloscf/is-skeletons-detector:0.0.3-openpose
+          image: luizcarloscf/is-skeletons-detector:0.0.4-openpose
           args: ["/opt/is/stream.bin", "/opt/options/options.json"]
           imagePullPolicy: Always
           ports:
@@ -27,7 +27,7 @@ spec:
           resources:
             limits:
               cpu: "1"
-              memory: 1024Mi
+              memory: 2048Mi
               nvidia.com/gpu: 1
           volumeMounts:
             - name: options
