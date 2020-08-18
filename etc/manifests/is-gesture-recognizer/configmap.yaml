@@ -11,7 +11,7 @@ data:
         "group_ids": [
             0
         ],
-        "exec_time": 2.5,
+        "exec_time": 1,
         "skeletons": {
             "min_keypoints": 8,
             "x_range": [-1, 1],
