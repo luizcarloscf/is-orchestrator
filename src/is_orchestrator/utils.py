@@ -118,11 +118,13 @@ def create_folder(dirname: str,
         log.info("File not exist")
 
     with open("{}/{}".format(dirname, filename), "w+") as f:
-        f.write('time,fps,uncertainty,skeletons,rabbitmq_msgs_per_second_skeletons,pod_skeletons_cpu,pod_skeletons_gpu\n')
+        f.write('time,fps,uncertainty,uncertainty_average,skeletons,skeletons_average,rabbitmq_msgs_per_second_skeletons,pod_skeletons_cpu,pod_skeletons_gpu\n')
 
 def put_data(timestamp: float,
              fps: int,
+             uncertainty: float,
              uncertainty_filtered: float,
+             skeletons: float,
              skeletons_filtered: float,
              pod_skeletons_cpu: int,
              pod_skeletons_gpu: int,
@@ -130,9 +132,11 @@ def put_data(timestamp: float,
              dirname: str,
              filename: str):
     with open("{}/{}".format(dirname, filename), "a") as f:
-        f.write('{},{},{},{},{},{},{}\n'.format(timestamp,
+        f.write('{},{},{},{},{},{},{},{},{}\n'.format(timestamp,
                                                 fps,
+                                                uncertainty,
                                                 uncertainty_filtered,
+                                                skeletons,
                                                 skeletons_filtered,
                                                 skeletons_msgs_rate,
                                                 pod_skeletons_cpu,

@@ -146,7 +146,9 @@ def main():
         
         put_data(timestamp=(time.time() - start_time),
                  fps=fps,
+                 uncertainty=uncertainty,
                  uncertainty_filtered=uncertainty_average,
+                 skeletons=skeletons,
                  skeletons_filtered=skeletons_average,
                  skeletons_msgs_rate=msgs_rate_skeletons,
                  pod_skeletons_cpu=skeletons_pods_cpu,
